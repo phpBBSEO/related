@@ -9,11 +9,12 @@
 */
 
 namespace phpbbseo\related;
+
 /**
 * ext Class
 * www.phpBB-SEO.com
 * @package No Duplicate phpBB SEO
 */
-class ext extends \phpbb\extension\base {
-
+class ext extends \phpbb\extension\base
+{
 }

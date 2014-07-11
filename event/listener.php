@@ -18,8 +18,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
 * Event listener
 */
-class listener implements EventSubscriberInterface {
-	static public function getSubscribedEvents() {
+class listener implements EventSubscriberInterface
+{
+	static public function getSubscribedEvents()
+	{
 		return array(
 			'core.viewtopic_modify_page_title' => 'core_viewtopic_modify_page_title',
 		);
@@ -225,7 +227,8 @@ class listener implements EventSubscriberInterface {
 	* @param	array	$topic_data	shuld at least provide with topic_id and topic_title
 	* @param 	mixed 	$forum_id 	The forum id to search in (false / 0 / null to search into all forums)
 	*/
-	private function build_query($topic_data, $forum_id = false) {
+	private function build_query($topic_data, $forum_id = false)
+	{
 		if (!($match = $this->prepare_match($topic_data['topic_title'])))
 		{
 			return false;
