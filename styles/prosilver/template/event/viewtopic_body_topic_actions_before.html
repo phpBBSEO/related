@@ -8,7 +8,11 @@
 *
 */
 -->
-<!-- IF S_RELATED_RESULTS --><div class="clear">&nbsp;</div><br /><br />
+<!-- IF S_RELATED_RESULTS -->
+<div class="clear">&nbsp;</div>
+
+<br /><br />
+
 <div class="forumbg">
 	<div class="inner">
 		<ul class="topiclist">
@@ -22,53 +26,58 @@
 			</li>
 		</ul>
 
-	<ul class="topiclist forums">
-	<!-- BEGIN related -->
-	<li class="row<!-- IF related.S_ROW_COUNT is even --> bg1<!-- ELSE --> bg2<!-- ENDIF --><!-- IF related.S_POST_GLOBAL --> global-announce<!-- ENDIF --><!-- IF related.S_POST_ANNOUNCE --> announce<!-- ENDIF --><!-- IF related.S_POST_STICKY --> sticky<!-- ENDIF --><!-- IF related.S_TOPIC_REPORTED --> reported<!-- ENDIF -->">
-		<dl class="icon {related.TOPIC_IMG_STYLE}">
-			<dt<!-- IF related.TOPIC_ICON_IMG and S_TOPIC_ICONS --> style="background-image: url({T_ICONS_PATH}{related.TOPIC_ICON_IMG}); background-repeat: no-repeat;"<!-- ENDIF --> title="{related.TOPIC_FOLDER_IMG_ALT}">
-				<!-- IF related.S_UNREAD_TOPIC and not S_IS_BOT --><a href="{topicrow.U_NEWEST_POST}" class="icon-link"></a><!-- ENDIF -->
-				<div class="list-inner">
-					<!-- IF related.S_UNREAD_TOPIC and not S_IS_BOT --><a href="{related.U_NEWEST_POST}">{NEWEST_POST_IMG}</a> <!-- ENDIF --><a class="topictitle" href="{related.U_TOPIC}" title="{related.TOPIC_TITLE} : {related.FORUM_NAME}">{related.TOPIC_TITLE}</a>
-					<!-- IF related.S_TOPIC_UNAPPROVED or related.S_POSTS_UNAPPROVED --><a href="{related.U_MCP_QUEUE}">{related.UNAPPROVED_IMG}</a> <!-- ENDIF -->
-					<!-- IF related.S_TOPIC_DELETED --><a href="{related.U_MCP_QUEUE}">{DELETED_IMG}</a> <!-- ENDIF -->
-					<!-- IF related.S_TOPIC_REPORTED --><a href="{related.U_MCP_REPORT}">{REPORTED_IMG}</a><!-- ENDIF --><br />
-					<!-- IF .related.pagination -->
-					<div class="pagination">
-						<ul>
-						<!-- BEGIN pagination -->
-							<!-- IF related.pagination.S_IS_PREV -->
-							<!-- ELSEIF related.pagination.S_IS_CURRENT --><li class="active"><span>{related.pagination.PAGE_NUMBER}</span></li>
-							<!-- ELSEIF related.pagination.S_IS_ELLIPSIS --><li class="ellipsis"><span>{L_ELLIPSIS}</span></li>
-							<!-- ELSEIF related.pagination.S_IS_NEXT -->
-							<!-- ELSE --><li><a href="{related.pagination.PAGE_URL}">{related.pagination.PAGE_NUMBER}</a></li>
+		<ul class="topiclist forums">
+			<!-- BEGIN related -->
+			<li class="row<!-- IF related.S_ROW_COUNT is even --> bg1<!-- ELSE --> bg2<!-- ENDIF --><!-- IF related.S_POST_GLOBAL --> global-announce<!-- ENDIF --><!-- IF related.S_POST_ANNOUNCE --> announce<!-- ENDIF --><!-- IF related.S_POST_STICKY --> sticky<!-- ENDIF --><!-- IF related.S_TOPIC_REPORTED --> reported<!-- ENDIF -->">
+				<dl class="icon {related.TOPIC_IMG_STYLE}">
+					<dt<!-- IF related.TOPIC_ICON_IMG and S_TOPIC_ICONS --> style="background-image: url({T_ICONS_PATH}{related.TOPIC_ICON_IMG}); background-repeat: no-repeat;"<!-- ENDIF --> title="{related.TOPIC_FOLDER_IMG_ALT}">
+						<!-- IF related.S_UNREAD_TOPIC and not S_IS_BOT --><a href="{topicrow.U_NEWEST_POST}" class="icon-link"></a><!-- ENDIF -->
+						<div class="list-inner">
+							<!-- IF related.S_UNREAD_TOPIC and not S_IS_BOT --><a href="{related.U_NEWEST_POST}">{NEWEST_POST_IMG}</a> <!-- ENDIF --><a class="topictitle" href="{related.U_TOPIC}" title="{related.TOPIC_TITLE} : {related.FORUM_NAME}">{related.TOPIC_TITLE}</a>
+							<!-- IF related.S_TOPIC_UNAPPROVED or related.S_POSTS_UNAPPROVED --><a href="{related.U_MCP_QUEUE}">{related.UNAPPROVED_IMG}</a> <!-- ENDIF -->
+							<!-- IF related.S_TOPIC_DELETED --><a href="{related.U_MCP_QUEUE}">{DELETED_IMG}</a> <!-- ENDIF -->
+							<!-- IF related.S_TOPIC_REPORTED --><a href="{related.U_MCP_REPORT}">{REPORTED_IMG}</a><!-- ENDIF --><br />
+							<!-- IF .related.pagination -->
+							<div class="pagination">
+								<ul>
+								<!-- BEGIN pagination -->
+									<!-- IF related.pagination.S_IS_PREV -->
+									<!-- ELSEIF related.pagination.S_IS_CURRENT --><li class="active"><span>{related.pagination.PAGE_NUMBER}</span></li>
+									<!-- ELSEIF related.pagination.S_IS_ELLIPSIS --><li class="ellipsis"><span>{L_ELLIPSIS}</span></li>
+									<!-- ELSEIF related.pagination.S_IS_NEXT -->
+									<!-- ELSE --><li><a href="{related.pagination.PAGE_URL}">{related.pagination.PAGE_NUMBER}</a></li>
+									<!-- ENDIF -->
+								<!-- END pagination -->
+								</ul>
+							</div>
 							<!-- ENDIF -->
-						<!-- END pagination -->
-						</ul>
-					</div>
-					<!-- ENDIF -->
-					<div class="responsive-hide">
-						<!-- IF related.S_HAS_POLL -->{POLL_IMG} <!-- ENDIF -->
-						<!-- IF related.ATTACH_ICON_IMG -->{related.ATTACH_ICON_IMG} <!-- ENDIF -->
-						{L_POST_BY_AUTHOR} {related.TOPIC_AUTHOR_FULL} &raquo; {related.FIRST_POST_TIME}
-					</div>
-					<!-- IF not S_IS_BOT -->
-					<div class="responsive-show" style="display: none;">
-						{L_LAST_POST} {L_POST_BY_AUTHOR} {related.LAST_POST_AUTHOR_FULL} &laquo; <a href="{related.U_LAST_POST}" title="{L_GOTO_LAST_POST}">{related.LAST_POST_TIME}</a>
-						<!-- IF related.REPLIES --><br />{L_REPLIES}{L_COLON} <strong>{related.REPLIES}</strong><!-- ENDIF -->
-					</div>
-					<!-- ENDIF -->
-				</div>
-			</dt>
-			<dd class="posts">{related.REPLIES} <dfn>{L_REPLIES}</dfn></dd>
-			<dd class="views">{related.VIEWS} <dfn>{L_VIEWS}</dfn></dd>
-			<dd class="lastpost"><span><dfn>{L_LAST_POST} </dfn>{L_POST_BY_AUTHOR} {related.LAST_POST_AUTHOR_FULL}
-				<a href="{related.U_LAST_POST}">{LAST_POST_IMG}</a><br />{related.LAST_POST_TIME}
-				<!-- IF related.U_FORUM and not related.S_POST_GLOBAL --><br /><a class="topictitle" href="{related.U_FORUM}" title="{related.FORUM_NAME}">{related.FORUM_NAME}</a><!-- ENDIF --></span></dd>
-		</dl>
-	</li>
-	<!-- END related -->
-	</ul>
-	<span class="corners-bottom"><span></span></span></div>
+							<div class="responsive-hide">
+								<!-- IF related.S_HAS_POLL -->{POLL_IMG} <!-- ENDIF -->
+								<!-- IF related.ATTACH_ICON_IMG -->{related.ATTACH_ICON_IMG} <!-- ENDIF -->
+								{L_POST_BY_AUTHOR} {related.TOPIC_AUTHOR_FULL} &raquo; {related.FIRST_POST_TIME}
+							</div>
+							<!-- IF not S_IS_BOT -->
+							<div class="responsive-show" style="display: none;">
+								{L_LAST_POST} {L_POST_BY_AUTHOR} {related.LAST_POST_AUTHOR_FULL} &laquo; <a href="{related.U_LAST_POST}" title="{L_GOTO_LAST_POST}">{related.LAST_POST_TIME}</a>
+								<!-- IF related.REPLIES --><br />{L_REPLIES}{L_COLON} <strong>{related.REPLIES}</strong><!-- ENDIF -->
+							</div>
+							<!-- ENDIF -->
+						</div>
+					</dt>
+					<dd class="posts">{related.REPLIES} <dfn>{L_REPLIES}</dfn></dd>
+					<dd class="views">{related.VIEWS} <dfn>{L_VIEWS}</dfn></dd>
+					<dd class="lastpost">
+						<span>
+							<dfn>{L_LAST_POST} </dfn>{L_POST_BY_AUTHOR} {related.LAST_POST_AUTHOR_FULL}
+							<a href="{related.U_LAST_POST}">{LAST_POST_IMG}</a><br />{related.LAST_POST_TIME}
+							<!-- IF related.U_FORUM and not related.S_POST_GLOBAL --><br /><a class="topictitle" href="{related.U_FORUM}" title="{related.FORUM_NAME}">{related.FORUM_NAME}</a><!-- ENDIF -->
+						</span>
+					</dd>
+				</dl>
+			</li>
+			<!-- END related -->
+		</ul>
+		<span class="corners-bottom"><span></span></span>
+	</div>
 </div>
 <!-- ENDIF -->
