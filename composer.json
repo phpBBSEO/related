@@ -15,10 +15,12 @@
 		"role": "Lead Developer"
 	}],
 	"require": {
-		"php": ">=5.3.0",
-		"phpbb/phpbb": "3.1.*@dev"
+		"php": ">=5.3.3"
 	},
 	"extra": {
-		"display-name": "Related Topics phpBB SEO"
+		"display-name": "Related Topics phpBB SEO",
+		"soft-require": {
+			"phpbb/phpbb": "3.1.*@dev"
+		}
 	}
 }
