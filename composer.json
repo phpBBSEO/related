@@ -14,7 +14,8 @@
 		"role": "Lead Developer"
 	}],
 	"require": {
-		"php": ">=5.3.3"
+		"php": ">=5.3.3",
+		"phpbbseo/usu": "2.0.*"
 	},
 	"extra": {
 		"display-name": "Related Topics phpBB SEO",
