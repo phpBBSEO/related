@@ -14,13 +14,12 @@
 		"role": "Lead Developer"
 	}],
 	"require": {
-		"php": ">=5.3.3",
-		"phpbbseo/usu": "2.0.*"
+		"php": ">=5.3.3"
 	},
 	"extra": {
 		"display-name": "Related Topics phpBB SEO",
 		"soft-require": {
-			"phpbb/phpbb": "3.1.*@dev"
+			"phpbb/phpbb": ">=3.1.0-RC2"
 		}
 	}
 }

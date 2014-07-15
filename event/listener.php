@@ -2,7 +2,7 @@
 /**
 *
 * @package No Duplicate phpBB SEO
-* @version $Id: listener.php 427 2014-07-09 14:09:27Z  $
+* @version $Id$
 * @copyright (c) 2014 www.phpbb-seo.com
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
@@ -103,7 +103,7 @@ class listener implements EventSubscriberInterface
 			$this->posts_per_page = $this->config['posts_per_page'];
 
 			//  better to always check, since it's fast
-			if ($this->db->sql_layer != 'mysql4' && $this->db->sql_layer != 'mysqli')
+			if ($this->db->get_sql_layer() != 'mysql4' && $this->db->get_sql_layer() != 'mysqli')
 			{
 				$this->fulltext = false;
 			}
@@ -407,7 +407,7 @@ class listener implements EventSubscriberInterface
 
 		if (!empty($sql_like))
 		{
-			switch ($this->db->sql_layer)
+			switch ($this->db->get_sql_layer())
 			{
 				case 'mysql':
 				case 'mysql4':
@@ -422,7 +422,7 @@ class listener implements EventSubscriberInterface
 					$escape = " ESCAPE '\\'";
 					// no break;
 				case 'postgres':
-					if ($this->db->sql_layer === 'postgres')
+					if ($this->db->get_sql_layer() === 'postgres')
 					{
 						$operator = 'ILIKE';
 					}
