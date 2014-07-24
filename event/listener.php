@@ -70,9 +70,6 @@ class listener implements EventSubscriberInterface
 	/* Limit in chars for the last post link text. */
 	protected $char_limit = 25;
 
-	/* Since we actually need the usu and migration depends on does not fully enforce rules */
-	protected $can_actually_run = false;
-
 	/**
 	* Constructor
 	*
@@ -91,7 +88,6 @@ class listener implements EventSubscriberInterface
 		global $phpbb_container; // god save the hax
 
 		$this->config = $config;
-		$this->can_actually_run = !empty($this->config['seo_related_on']);
 		$this->usu_core = $usu_core;
 		$this->usu_rewrite = !empty($this->config['seo_usu_on']) && !empty($usu_core) && !empty($this->usu_core->seo_opt['sql_rewrite']) ? true : false;
 
