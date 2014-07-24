@@ -20,6 +20,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class listener implements EventSubscriberInterface
 {
+	/** @var \phpbbseo\usu\core */
+	protected $usu_core;
+
 	/* @var \phpbb\user */
 	protected $user;
 
@@ -58,6 +61,8 @@ class listener implements EventSubscriberInterface
 
 	protected $posts_per_page = 1;
 
+	protected $usu_rewrite = false;
+
 	protected $forum_exclude = array();
 
 	protected $fulltext = false;
@@ -71,46 +76,46 @@ class listener implements EventSubscriberInterface
 	/**
 	* Constructor
 	*
-	* @param \phpbb\config\config				$config				Config object
-	* @param \phpbb\auth\auth					$auth				Auth object
-	* @param \phpbb\template\template			$template			Template object
-	* @param \phpbb\user						$user				User object
-	* @param \phpbb\cache\service				$cache				Cache driver
-	* @param \phpbb\db\driver\driver_interface	$db					Database object
-	* @param string								$phpbb_root_path	Path to the phpBB root
-	* @param string								$php_ext			PHP file extension
+	* @param \phpbb\config\config			$config				Config object
+	* @param \phpbb\auth\auth			$auth				Auth object
+	* @param \phpbb\template\template		$template			Template object
+	* @param \phpbb\user				$user				User object
+	* @param \phpbb\cache\service			$cache				Cache driver
+	* @param \phpbb\db\driver\driver_interface	$db				Database object
+	* @param string					$phpbb_root_path		Path to the phpBB root
+	* @param string					$php_ext			PHP file extension
+	* @param \phpbbseo\usu\core			$usu_core			usu core object
 	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\user $user, \phpbb\cache\service $cache, \phpbb\db\driver\driver_interface $db, $phpbb_root_path, $php_ext)
+	public function __construct(\phpbb\config\config $config, \phpbb\auth\auth $auth, \phpbb\template\template $template, \phpbb\user $user, \phpbb\cache\service $cache, \phpbb\db\driver\driver_interface $db, $phpbb_root_path, $php_ext, \phpbbseo\usu\core $usu_core = null)
 	{
 		global $phpbb_container; // god save the hax
 
 		$this->config = $config;
 		$this->can_actually_run = !empty($this->config['seo_related_on']);
+		$this->usu_core = $usu_core;
+		$this->usu_rewrite = !empty($this->config['seo_usu_on']) && !empty($usu_core) && !empty($this->usu_core->seo_opt['sql_rewrite']) ? true : false;
 
-		if ($this->can_actually_run)
+		$this->user = $user;
+		$this->auth = $auth;
+		$this->cache = $cache;
+		$this->db = $db;
+		$this->template = $template;
+
+		$this->content_visibility = $phpbb_container->get('content.visibility');
+		$this->pagination = $phpbb_container->get('pagination');
+		$this->phpbb_root_path = $phpbb_root_path;
+		$this->php_ext = $php_ext;
+
+		$this->posts_per_page = $this->config['posts_per_page'];
+
+		//  better to always check, since it's fast
+		if ($this->db->get_sql_layer() != 'mysql4' && $this->db->get_sql_layer() != 'mysqli')
 		{
-			$this->user = $user;
-			$this->auth = $auth;
-			$this->cache = $cache;
-			$this->db = $db;
-			$this->template = $template;
-
-			$this->content_visibility = $phpbb_container->get('content.visibility');
-			$this->pagination = $phpbb_container->get('pagination');
-			$this->phpbb_root_path = $phpbb_root_path;
-			$this->php_ext = $php_ext;
-
-			$this->posts_per_page = $this->config['posts_per_page'];
-
-			//  better to always check, since it's fast
-			if ($this->db->get_sql_layer() != 'mysql4' && $this->db->get_sql_layer() != 'mysqli')
-			{
-				$this->fulltext = false;
-			}
-			else
-			{
-				$this->fulltext = !empty($this->config['seo_related_fulltext']);
-			}
+			$this->fulltext = false;
+		}
+		else
+		{
+			$this->fulltext = !empty($this->config['seo_related_fulltext']);
 		}
 	}
 
@@ -124,11 +129,6 @@ class listener implements EventSubscriberInterface
 	public function core_viewtopic_modify_page_title($event)
 	{
 		global $topic_tracking_info;
-
-		if (!$this->can_actually_run)
-		{
-			return;
-		}
 
 		$topic_data = $event['topic_data'];
 		$forum_id = $event['forum_id'];
@@ -157,20 +157,18 @@ class listener implements EventSubscriberInterface
 				{
 					$row['topic_title'] = censor_text($row['topic_title']);
 
-					// www.phpBB-SEO.com SEO TOOLKIT BEGIN
-					if (!empty(\phpbbseo\usu\core::$seo_opt['url_rewrite']))
+					if ($this->usu_rewrite)
 					{
-						\phpbbseo\usu\core::set_url($row['forum_name'], $related_forum_id, \phpbbseo\usu\core::$seo_static['forum']);
-						\phpbbseo\usu\core::prepare_iurl($row, 'topic', $row['topic_type'] == POST_GLOBAL ? \phpbbseo\usu\core::$seo_static['global_announce'] : \phpbbseo\usu\core::$seo_url['forum'][$related_forum_id]);
+						$this->usu_core->set_url($row['forum_name'], $related_forum_id, $this->usu_core->seo_static['forum']);
+						$this->usu_core->prepare_iurl($row, 'topic', $row['topic_type'] == POST_GLOBAL ? $this->usu_core->seo_static['global_announce'] : $this->usu_core->seo_url['forum'][$related_forum_id]);
 					}
-					// www.phpBB-SEO.com SEO TOOLKIT END
 
 					// Replies
 					$replies = $this->content_visibility->get_count('topic_posts', $row, $related_forum_id) - 1;
 					$unread_topic = (isset($topic_tracking_info[$related_topic_id]) && $row['topic_last_post_time'] > $topic_tracking_info[$related_topic_id]) ? true : false;
 					$view_topic_url = append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id");
-					$topic_unapproved = (($row['topic_visibility'] == ITEM_UNAPPROVED || $row['topic_visibility'] == ITEM_REAPPROVE) && $auth->acl_get('m_approve', $row['forum_id']));
-					$posts_unapproved = ($row['topic_visibility'] == ITEM_APPROVED && $row['topic_posts_unapproved'] && $auth->acl_get('m_approve', $row['forum_id']));
+					$topic_unapproved = (($row['topic_visibility'] == ITEM_UNAPPROVED || $row['topic_visibility'] == ITEM_REAPPROVE) && $this->auth->acl_get('m_approve', $row['forum_id']));
+					$posts_unapproved = ($row['topic_visibility'] == ITEM_APPROVED && $row['topic_posts_unapproved'] && $this->auth->acl_get('m_approve', $row['forum_id']));
 					$topic_deleted = $row['topic_visibility'] == ITEM_DELETED;
 
 					$u_mcp_queue = ($topic_unapproved || $posts_unapproved) ? append_sid("{$phpbb_root_path}mcp.$this->php_ext", 'i=queue&amp;mode=' . (($topic_unapproved) ? 'approve_details' : 'unapproved_posts') . "&amp;t=$topic_id", true, $user->session_id) : '';
@@ -180,15 +178,20 @@ class listener implements EventSubscriberInterface
 					$folder_img = $folder_alt = $topic_type = '';
 					topic_status($row, $replies, $unread_topic, $folder_img, $folder_alt, $topic_type);
 
-					// www.phpBB-SEO.com SEO TOOLKIT BEGIN -> no dupe
-					if (!empty($this->config['no_dupe_on']))
+					$_start = '';
+					if (!empty($this->config['seo_no_dupe_on']))
 					{
-						if (($replies + 1) > $this->config['topic_per_page'])
+						if (($replies + 1) > $this->posts_per_page)
 						{
-							$last_pages[$related_topic_id] = floor($replies / $this->config['topic_per_page']) * $this->config['topic_per_page'];
+							$_start = floor($replies / $this->posts_per_page) * $this->posts_per_page;
+							$_start = $_start ? "&amp;start=$_start" : '';
 						}
+						$u_last_post = append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id$_start") . '#p' . $row['topic_last_post_id'];
 					}
-					// www.phpBB-SEO.com SEO TOOLKIT END -> no dupe
+					else
+					{
+						$u_last_post = append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id&amp;p=" . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'];
+					}
 
 					$this->template->assign_block_vars('related', array(
 						'TOPIC_TITLE'			=> $row['topic_title'],
@@ -201,11 +204,7 @@ class listener implements EventSubscriberInterface
 						'LAST_POST_TIME'		=> $this->user->format_date($row['topic_last_post_time']),
 						'TOPIC_AUTHOR_FULL'		=>  get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
 						'LAST_POST_AUTHOR_FULL'	=>  get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
-
-						// www.phpBB-SEO.com SEO TOOLKIT BEGIN -> no dupe
-						'U_LAST_POST'			=> !empty($this->config['no_dupe_on']) ? append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id&amp;start=" . @intval($last_pages[$related_topic_id])) . '#p' . $row['topic_last_post_id'] : append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id&amp;p=" . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'],
-						// www.phpBB-SEO.com SEO TOOLKIT END -> no dupe
-
+						'U_LAST_POST'			=> $u_last_post,
 						'TOPIC_IMG_STYLE'		=> $folder_img,
 						'TOPIC_FOLDER_IMG_SRC'	=> $this->user->img($folder_img, $folder_alt, false, '', 'src'),
 						'TOPIC_FOLDER_IMG'		=> $this->user->img($folder_img, $folder_alt, false),
@@ -227,7 +226,7 @@ class listener implements EventSubscriberInterface
 						'U_MCP_QUEUE'			=> $u_mcp_queue,
 					));
 
-					$this->pagination->generate_template_pagination($view_topic_url, 'related.pagination', 'start', $replies + 1, $this->config['posts_per_page'], 1, true, true);
+					$this->pagination->generate_template_pagination($view_topic_url, 'related.pagination', 'start', $replies + 1, $this->posts_per_page, 1, true, true);
 					$related_result = true;
 				}
 			}
@@ -245,7 +244,7 @@ class listener implements EventSubscriberInterface
 				'UNAPPROVED_IMG'	=> $this->user->img('icon_topic_unapproved', 'TOPIC_UNAPPROVED'),
 				'DELETED_IMG'		=> $this->user->img('icon_topic_deleted', 'TOPIC_DELETED'),
 				'GOTO_PAGE_IMG'		=> $this->user->img('icon_post_target', 'GOTO_PAGE'),
-				'POLL_IMG'			=> $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
+				'POLL_IMG'		=> $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
 				'S_TOPIC_ICONS'		=> $enable_icons,
 			));
 		}
