@@ -1,0 +1,72 @@
+<!--
+/**
+*
+* @package Related topics phpBB SEO
+* @version $$
+* @copyright (c) 2014 www.phpbb-seo.com
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+*
+*/
+-->
+<!-- IF S_RELATED_RESULTS -->
+<br clear="all" />
+	<table class="tablebg" width="100%" cellspacing="1">
+	<tr>
+		<td class="cat" colspan="<!-- IF S_TOPIC_ICONS -->7<!-- ELSE -->6<!-- ENDIF -->"><span class="nav">{L_RELATED_TOPICS}</span></td>
+	</tr>
+	<tr>
+		<!-- IF S_TOPIC_ICONS -->
+			<th colspan="3">&nbsp;{L_TOPICS}&nbsp;</th>
+		<!-- ELSE -->
+			<th colspan="2">&nbsp;{L_TOPICS}&nbsp;</th>
+		<!-- ENDIF -->
+		<th>&nbsp;{L_AUTHOR}&nbsp;</th>
+		<th>&nbsp;{L_REPLIES}&nbsp;</th>
+		<th>&nbsp;{L_VIEWS}&nbsp;</th>
+		<th>&nbsp;{L_LAST_POST}&nbsp;</th>
+	</tr>
+	<!-- BEGIN related -->
+		<tr>
+			<td class="row1" width="25" align="center">{related.TOPIC_FOLDER_IMG}</td>
+		<!-- IF S_TOPIC_ICONS -->
+				<td class="row1" width="25" align="center"><!-- IF related.TOPIC_ICON_IMG --><img src="{T_ICONS_PATH}{related.TOPIC_ICON_IMG}" width="{related.TOPIC_ICON_IMG_WIDTH}" height="{related.TOPIC_ICON_IMG_HEIGHT}" alt="" title="" /><!-- ENDIF --></td>
+			<!-- ENDIF -->
+			<td class="row1">
+				<!-- IF related.S_UNREAD_TOPIC and not S_IS_BOT --><a href="{related.U_NEWEST_POST}">{NEWEST_POST_IMG}</a><!-- ENDIF -->
+				{related.ATTACH_ICON_IMG} <a title="{L_POSTED}: {related.FIRST_POST_TIME}" href="{related.U_TOPIC}"class="topictitle">{related.TOPIC_TITLE}</a>
+				<!-- IF related.S_TOPIC_UNAPPROVED or related.S_POSTS_UNAPPROVED -->
+					<a href="{related.U_MCP_QUEUE}">{related.UNAPPROVED_IMG}</a>&nbsp;
+				<!-- ENDIF -->
+				<!-- IF related.S_TOPIC_REPORTED -->
+					<a href="{related.U_MCP_REPORT}">{REPORTED_IMG}</a>&nbsp;
+				<!-- ENDIF -->
+				<!-- IF .related.pagination -->
+					<p class="gensmall"> [ {GOTO_PAGE_IMG}{L_GOTO_PAGE}{L_COLON}
+					<!-- BEGIN pagination -->
+						<!-- IF related.pagination.S_IS_PREV -->
+						<!-- ELSEIF related.pagination.S_IS_CURRENT --><strong>{related.pagination.PAGE_NUMBER}</strong>
+						<!-- ELSEIF related.pagination.S_IS_ELLIPSIS --> {L_ELLIPSIS}
+						<!-- ELSEIF related.pagination.S_IS_NEXT -->
+						<!-- ELSE --><a href="{related.pagination.PAGE_URL}">{related.pagination.PAGE_NUMBER}</a>
+						<!-- ENDIF -->
+					<!-- END pagination -->
+					] </p>
+				<!-- ENDIF -->
+			</td>
+			<td class="row2" width="130" align="center"><p class="topicauthor">{related.TOPIC_AUTHOR_FULL}</p></td>
+			<td class="row1" width="50" align="center"><p class="topicdetails">{related.REPLIES}</p></td>
+			<td class="row2" width="50" align="center"><p class="topicdetails">{related.VIEWS}</p></td>
+			<td class="row1" width="140" align="center">
+				<p class="topicdetails" style="white-space: nowrap;">{related.LAST_POST_TIME}</p>
+				<p class="topicdetails">{related.LAST_POST_AUTHOR_FULL}
+					<a href="{related.U_LAST_POST}">{LAST_POST_IMG}</a>
+				</p>
+			</td>
+		</tr>
+	<!-- END related -->
+	<tr align="center">
+		<td class="cat" colspan="<!-- IF S_TOPIC_ICONS -->7<!-- ELSE -->6<!-- ENDIF -->">&nbsp;</td>
+	</tr>
+	</table>
+	<br clear="all" />
+<!-- ENDIF -->

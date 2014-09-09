@@ -142,6 +142,7 @@ class listener implements EventSubscriberInterface
 			$attachement_icon = $this->user->img('icon_topic_attach', $this->user->lang['TOTAL_ATTACHMENTS']);
 			$s_attachement = $this->auth->acl_get('u_download');
 			$last_pages = array();
+			$has_at_least_one_icon = false;
 
 			while($row = $this->db->sql_fetchrow($result))
 			{
@@ -167,8 +168,8 @@ class listener implements EventSubscriberInterface
 					$posts_unapproved = ($row['topic_visibility'] == ITEM_APPROVED && $row['topic_posts_unapproved'] && $this->auth->acl_get('m_approve', $row['forum_id']));
 					$topic_deleted = $row['topic_visibility'] == ITEM_DELETED;
 
-					$u_mcp_queue = ($topic_unapproved || $posts_unapproved) ? append_sid("{$phpbb_root_path}mcp.$this->php_ext", 'i=queue&amp;mode=' . (($topic_unapproved) ? 'approve_details' : 'unapproved_posts') . "&amp;t=$topic_id", true, $user->session_id) : '';
-					$u_mcp_queue = (!$u_mcp_queue && $topic_deleted) ? append_sid("{$this->phpbb_root_path}mcp.$this->php_ext", 'i=queue&amp;mode=deleted_topics&amp;t=' . $topic_id, true, $this->user->session_id) : $u_mcp_queue;
+					$u_mcp_queue = ($topic_unapproved || $posts_unapproved) ? append_sid("{$this->phpbb_root_path}mcp.$this->php_ext", 'i=queue&amp;mode=' . (($topic_unapproved) ? 'approve_details' : 'unapproved_posts') . "&amp;t=$related_topic_id", true, $this->user->session_id) : '';
+					$u_mcp_queue = (!$u_mcp_queue && $topic_deleted) ? append_sid("{$this->phpbb_root_path}mcp.$this->php_ext", 'i=queue&amp;mode=deleted_topics&amp;t=' . $related_topic_id, true, $this->user->session_id) : $u_mcp_queue;
 
 					// Get folder img, topic status/type related information
 					$folder_img = $folder_alt = $topic_type = '';
@@ -188,24 +189,34 @@ class listener implements EventSubscriberInterface
 					{
 						$u_last_post = append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "f=$related_forum_id&amp;t=$related_topic_id&amp;p=" . $row['topic_last_post_id']) . '#p' . $row['topic_last_post_id'];
 					}
+					$topic_icon_img = $topic_icon_img_width = $topic_icon_img_height = '';
+					if (!empty($icons[$row['icon_id']]))
+					{
+						$topic_icon_img = $icons[$row['icon_id']]['img'];
+						$topic_icon_img_width = $icons[$row['icon_id']]['width'];
+						$topic_icon_img_height = $icons[$row['icon_id']]['height'];
+						$has_at_least_one_icon = true;
+					}
 
 					$this->template->assign_block_vars('related', array(
 						'TOPIC_TITLE'			=> $row['topic_title'],
-						'U_TOPIC'				=> $view_topic_url,
-						'U_FORUM'				=> $allforums ? append_sid("{$this->phpbb_root_path}viewforum.$this->php_ext", "f=$related_forum_id") : '',
+						'U_TOPIC'			=> $view_topic_url,
+						'U_FORUM'			=> $allforums ? append_sid("{$this->phpbb_root_path}viewforum.$this->php_ext", "f=$related_forum_id") : '',
 						'FORUM_NAME'			=> $row['forum_name'],
-						'REPLIES'				=> $replies,
-						'VIEWS'					=> $row['topic_views'],
+						'REPLIES'			=> $replies,
+						'VIEWS'				=> $row['topic_views'],
 						'FIRST_POST_TIME'		=> $this->user->format_date($row['topic_time']),
 						'LAST_POST_TIME'		=> $this->user->format_date($row['topic_last_post_time']),
 						'TOPIC_AUTHOR_FULL'		=>  get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-						'LAST_POST_AUTHOR_FULL'	=>  get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+						'LAST_POST_AUTHOR_FULL'		=>  get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
 						'U_LAST_POST'			=> $u_last_post,
 						'TOPIC_IMG_STYLE'		=> $folder_img,
-						'TOPIC_FOLDER_IMG_SRC'	=> $this->user->img($folder_img, $folder_alt, false, '', 'src'),
+						'TOPIC_FOLDER_IMG_SRC'		=> $this->user->img($folder_img, $folder_alt, false, '', 'src'),
 						'TOPIC_FOLDER_IMG'		=> $this->user->img($folder_img, $folder_alt, false),
-						'TOPIC_FOLDER_IMG_ALT'	=> $this->user->lang[$folder_alt],
-						'TOPIC_ICON_IMG'		=> (!empty($icons[$row['icon_id']])) ? $icons[$row['icon_id']]['img'] : '',
+						'TOPIC_FOLDER_IMG_ALT'		=> $this->user->lang[$folder_alt],
+						'TOPIC_ICON_IMG'		=> $topic_icon_img,
+						'TOPIC_ICON_IMG_WIDTH'		=> $topic_icon_img_width,
+						'TOPIC_ICON_IMG_HEIGHT'		=> $topic_icon_img_height,
 						'UNAPPROVED_IMG'		=> ($topic_unapproved || $posts_unapproved) ? $this->user->img('icon_topic_unapproved', ($topic_unapproved) ? 'TOPIC_UNAPPROVED' : 'POSTS_UNAPPROVED') : '',
 						'ATTACH_ICON_IMG'		=> ($row['topic_attachment'] && $s_attachement) ? $attachement_icon : '',
 						'S_TOPIC_REPORTED'		=> (!empty($row['topic_reported']) && $this->auth->acl_get('m_report', $related_forum_id)) ? true : false,
@@ -214,8 +225,8 @@ class listener implements EventSubscriberInterface
 						'S_POST_GLOBAL'			=> ($row['topic_type'] == POST_GLOBAL) ? true : false,
 						'S_POST_STICKY'			=> ($row['topic_type'] == POST_STICKY) ? true : false,
 						'S_TOPIC_LOCKED'		=> ($row['topic_status'] == ITEM_LOCKED) ? true : false,
-						'S_TOPIC_UNAPPROVED'	=> $topic_unapproved,
-						'S_POSTS_UNAPPROVED'	=> $posts_unapproved,
+						'S_TOPIC_UNAPPROVED'		=> $topic_unapproved,
+						'S_POSTS_UNAPPROVED'		=> $posts_unapproved,
 						'S_HAS_POLL'			=> ($row['poll_start']) ? true : false,
 						'S_TOPIC_DELETED'		=> $topic_deleted,
 						'U_MCP_REPORT'			=> append_sid("{$this->phpbb_root_path}mcp.$this->php_ext", 'i=reports&amp;mode=reports&amp;f=' . $related_forum_id . '&amp;t=' . $related_topic_id, true, $this->user->session_id),
@@ -241,7 +252,7 @@ class listener implements EventSubscriberInterface
 				'DELETED_IMG'		=> $this->user->img('icon_topic_deleted', 'TOPIC_DELETED'),
 				'GOTO_PAGE_IMG'		=> $this->user->img('icon_post_target', 'GOTO_PAGE'),
 				'POLL_IMG'		=> $this->user->img('icon_topic_poll', 'TOPIC_POLL'),
-				'S_TOPIC_ICONS'		=> $enable_icons,
+				'S_TOPIC_ICONS'		=> $enable_icons && $has_at_least_one_icon,
 			));
 		}
 	}
