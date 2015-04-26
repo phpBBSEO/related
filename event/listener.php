@@ -101,7 +101,7 @@ class listener implements EventSubscriberInterface
 		$this->pagination = $phpbb_container->get('pagination');
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
-
+                
 		$this->posts_per_page = $this->config['posts_per_page'];
 
 		//  better to always check, since it's fast
@@ -126,6 +126,8 @@ class listener implements EventSubscriberInterface
 	{
 		global $topic_tracking_info;
 
+                $this->user->add_lang_ext("phpbbseo/related", "lang");
+                
 		$topic_data = $event['topic_data'];
 		$forum_id = $event['forum_id'];
 
