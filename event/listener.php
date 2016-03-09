@@ -237,6 +237,12 @@ class listener implements EventSubscriberInterface
 					$related_result = true;
 				}
 			}
+			if (!isset($this->user->lang['RELATED_TOPICS'])){
+				$this->user->lang['RELATED_TOPICS'] = 'Related Topics';
+				if ($this->config['default_lang'] == 'de'){
+					$this->user->lang['RELATED_TOPICS'] = 'Ähnliche Beiträge';
+				}
+			}
 
 			$this->db->sql_freeresult($result);
 		}
